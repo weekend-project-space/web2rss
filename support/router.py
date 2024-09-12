@@ -30,7 +30,7 @@ class Router:
         self._remote_url = get_item('remote_url')
         self._local_repo_path = get_item('local_repo_path')
         self._router_file_path = router_file_path
-        print(f"init {router_file_path} routes: {routes}")
+        print(f"init {router_file_path} routes: {routes.keys()}")
 
     def _call(self, fn):
         return fn(self.routes)
@@ -51,6 +51,9 @@ class Router:
         routes = self.search(has_url)
         if len(routes) > 0:
             return routes
+        routes = _get_remote_router_no_err().search(has_url)
+        if len(routes) > 0:
+            return list(map(lambda r:  r.put_ext('source', 'remote'), routes))
         res_text = fetch(url, 'text')
         if _is_rss_or_atom(res_text):
             key = url.split('://')[1]
@@ -58,29 +61,29 @@ class Router:
             routes = self.search(has_url)
             if len(routes) > 0:
                 return routes
-        routes = _get_remote_router_no_err().search(has_url)
-        return list(map(lambda r:  r.put_ext('source', 'remote'), routes))
+        return []
 
     def add(self, key, url, type, parserStr=None):
         route = Route(key, url, None, type)
         if parserStr is not None and parserStr.strip() != "":
             _write_parser_file(self._local_repo_path, key, parserStr)
-        _append_router_file(self._local_repo_path+'/router.txt', route.meta)
+        _append_router_file(self._router_file_path, route.meta)
         self.routes[key] = route
 
     def pull_route(self, key):
-        _pullRoute(self._remote_url, self._local_repo_path, key)
+        _pullRoute(self._remote_url, self._local_repo_path,
+                   self._router_file_path, key)
         self.refresh()
 
     def refresh(self):
-        self.routes = __init_routes(self._router_file_path)
+        self.routes = _init_routes(self._router_file_path)
 
 
 def init_router(router_file_path="router.txt"):
-    return Router(__init_routes(router_file_path), router_file_path)
+    return Router(_init_routes(router_file_path), router_file_path)
 
 
-def __init_routes(router_file_path):
+def _init_routes(router_file_path):
     with open(router_file_path, 'r') as file:
         return _bulid_routes(file)
 
@@ -120,18 +123,28 @@ def _get_remote_router_no_err():
         return Router({}, 'remote')
 
 
+_remote_router_cache = None
+
+
 def _get_remote_router():
-    remote_routes_file = fetch(get_item('remote_url')+'/router.txt', 'text')
-    return Router(_bulid_routes(remote_routes_file), 'remote')
+    global _remote_router_cache
+    if _remote_router_cache is None:
+        url = get_item('remote_url')+'/router.txt'
+        # print(url)
+        remote_routes_file = fetch(url, 'text')
+        # print(remote_routes_file)
+        _remote_router_cache = Router(
+            _bulid_routes(remote_routes_file.split('\n')), 'remote')
+    return _remote_router_cache
 
 
-def _pullRoute(remote_url, local_repo_path, key):
+def _pullRoute(remote_url, local_repo_path, local_router_path, key):
     repo_url = "{}/repo/{}.py".format(remote_url, _get_module_path(key).
                                       replace('.', '/'))
     parser_py_str = fetch(repo_url, 'text')
     _write_parser_file(local_repo_path, key, parser_py_str)
     line = _get_remote_router().search(lambda r: r.key == key)[0].meta
-    local_router_path = local_repo_path + 'router.txt'
+    # print(local_router_path)
     _append_router_file(local_router_path, line)
 
 
@@ -141,7 +154,7 @@ def _write_parser_file(local_repo_path, key, parser_py):
                                                replace('.', '/'))
     local_parser_path = local_parser_path[2:] if local_parser_path[:2] == './'\
         else local_parser_path
-    print(local_parser_path)
+    # print(local_parser_path)
     __write_file(local_parser_path, 'w', parser_py)
 
 
@@ -153,9 +166,10 @@ def _append_router_file(local_router_path, line):
 def __write_file(file_path, mode, content):
     # 获取文件所在的目录路径
     dir_path = os.path.dirname(file_path)
-    # 如果目录不存在，就创建目录
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+    if dir_path != '':
+        # 如果目录不存在，就创建目录
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
     # 写入文件
     with open(file_path, mode, encoding='utf-8') as file:
         file.write(content)

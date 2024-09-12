@@ -46,6 +46,12 @@ def call():
     return Response(d, mimetype='text/xml')
 
 
+@app.route('/route/<path:key>', methods=['POST'])
+def pull_route(key):
+    router.pull_route(key)
+    return make_response("", 201)
+
+
 @app.route('/route', methods=['POST'])
 def save_route():
     data = request.get_json()
@@ -56,7 +62,7 @@ def save_route():
     key = key[:-1] if key[-1] == '/' else key
     url = url[:-1] if url[-1] == '/' else url
     router.add(key, url, 'html', data['fun'])
-    return make_response("", 204)
+    return make_response("", 201)
 
 
 # 展示 RSS 订阅内容

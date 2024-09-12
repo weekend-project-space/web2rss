@@ -91,7 +91,8 @@
                             </td>
                             <td
                                 class="border-b border-slate-100 dark:border-slate-700 p-4 pr-8 text-indigo-200 hover:text-indigo-300 dark:text-indigo-400">
-                                <a target="_blank" :href="item.feed" v-text="item.feed"></a>
+                                <p v-if="item.source=='remote'" @click="pullRoute">pull</p>
+                                <a v-else target="_blank" :href="item.feed" v-text="item.feed"></a>
                             </td>
                         </tr>
                     </tbody>
@@ -126,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="flex justify-center ">
+            <div class="py-6 flex justify-center ">
                 <a class="text-center" href="https://github.com/weekend-project-space/web2rss"><img
                         src="https://img.shields.io/github/stars/weekend-project-space/web2rss.svg?style=social&amp;label=Stars"
                         alt=""></a>
@@ -156,32 +157,33 @@
                 const loading = ref(false)
                 const value = ref('')
                 let messages = []
-                async function gen() {
+                async function useLoading(fun) {
                     loading.value = true
                     try {
+                        await fun()
+                    } catch (e) {
+                        console.error(e)
+                    }
+                    loading.value = false
+                }
+                async function gen() {
+                    useLoading(async () => {
                         await loadData()
                         if (!data.value.length) {
                             await genPyCode()
                         }
-                    } catch {
-
-                    }
-                    loading.value = false
+                    })
                 }
                 async function loadData() {
                     data.value = []
                     data.value = await fetch(`/feed?url=${text.value}`).then(response => response.json())
                 }
-                async function chatGenCode() {
+                function chatGenCode() {
                     code.value = ''
-                    loading.value = true
-                    try {
+                    useLoading(async () => {
                         const d = [...messages, { "role": "user", "content": value.value + "\n 请重新生成，只生成代码" }]
                         await genPyCode(d)
-                    } catch (e) {
-
-                    }
-                    loading.value = false
+                    })
                 }
                 async function genPyCode(messages0) {
                     let data = {
@@ -221,22 +223,37 @@
                     // 在新窗口中打开这个 URL
                     window.open(url);
                 }
-                async function saveRoute() {
-                    const fun = document.querySelector('#coderef').innerText
-                    // 定义要发送的数据
-                    const data = {
-                        fun: fun,
-                        url: text.value,
-                        key: text.value.split('://')[1]
-                    };
-                    await fetch('/route', {
-                        method: 'POST', // 请求方法
-                        headers: {
-                            'Content-Type': 'application/json' // 设置请求头，表明发送 JSON 数据
-                        },
-                        body: JSON.stringify(data) // 将 JavaScript 对象转换为 JSON 字符串
-                    }).then(response => response.text())
-                    loadData()
+                function pullRoute() {
+                    useLoading(async () => {
+                        const key = text.value.split('://')[1]
+
+                        await fetch(`/route/${key}`, {
+                            method: 'POST', // 请求方法
+                            headers: {
+                                'Content-Type': 'application/json' // 设置请求头，表明发送 JSON 数据
+                            }
+                        }).then(response => response.text())
+                        loadData()
+                    })
+                }
+                function saveRoute() {
+                    useLoading(async () => {
+                        const fun = document.querySelector('#coderef').innerText
+                        // 定义要发送的数据
+                        const data = {
+                            fun: fun,
+                            url: text.value,
+                            key: text.value.split('://')[1]
+                        };
+                        await fetch('/route', {
+                            method: 'POST', // 请求方法
+                            headers: {
+                                'Content-Type': 'application/json' // 设置请求头，表明发送 JSON 数据
+                            },
+                            body: JSON.stringify(data) // 将 JavaScript 对象转换为 JSON 字符串
+                        }).then(response => response.text())
+                        loadData()
+                    })
                 }
                 return {
                     text,
@@ -247,6 +264,7 @@
                     gen,
                     run,
                     saveRoute,
+                    pullRoute,
                     mark,
                     chatGenCode
                 }
