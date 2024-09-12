@@ -6,6 +6,8 @@
 
 - [x] 支持 llm
 
+- [x] 支持 rss 源代理
+
 - [x] local router (pull) -> remote router -> save local
 
 - [x] local router (push) -> remote router -> save remote
