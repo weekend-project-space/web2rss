@@ -51,15 +51,13 @@ class Router:
         routes = self.search(has_url)
         if len(routes) > 0:
             return routes
-        elif url.endswith('.xml'):
-            res_text = fetch(url, 'text')
-            print(res_text)
-            if '</feed>' in res_text or '</rss>' in res_text:
-                key = url.split('://')[1]
-                self.add(key, url, 'proxy')
-                routes = self.search(has_url)
-                if len(routes) > 0:
-                    return routes
+        res_text = fetch(url, 'text')
+        if _is_rss_or_atom(res_text):
+            key = url.split('://')[1]
+            self.add(key, url, 'proxy')
+            routes = self.search(has_url)
+            if len(routes) > 0:
+                return routes
         routes = _get_remote_router_no_err().search(has_url)
         return list(map(lambda r:  r.put_ext('source', 'remote'), routes))
 
@@ -161,3 +159,7 @@ def __write_file(file_path, mode, content):
     # 写入文件
     with open(file_path, mode, encoding='utf-8') as file:
         file.write(content)
+
+
+def _is_rss_or_atom(content):
+    return ('<rss' in content or '<feed' in content)

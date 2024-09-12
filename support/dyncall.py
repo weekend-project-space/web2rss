@@ -3,7 +3,7 @@ from support.fetch import fetch
 import PyRSS2Gen
 from datetime import datetime
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
 
 
 def call(module_name, url, config):

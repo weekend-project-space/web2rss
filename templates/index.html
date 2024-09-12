@@ -170,7 +170,7 @@
                     code.value = ''
                     loading.value = true
                     try {
-                        const d = [...messages, { "role": "user", "content": value.value }]
+                        const d = [...messages, { "role": "user", "content": value.value + "\n 请重新生成，只生成代码" }]
                         await genPyCode(d)
                     } catch (e) {
 

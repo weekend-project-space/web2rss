@@ -3,7 +3,7 @@ from flask import Flask, Response, request, make_response, render_template, \
 # from paser.t import parser
 from support.router import init_router
 from support.config import init_cofig
-from support.gpt import gen_code, chat
+from support.gpt import gen_code, gen_code_chat
 from support.dyncall import eval_rss_parser
 
 
@@ -28,10 +28,10 @@ def json_example():
 
 
 @app.route('/chat', methods=['POST'])
-def chat_():
+def chat():
     data = request.get_json()
     if 'messages' in data and len(data['messages']):
-        return jsonify(chat(data['messages']))
+        return jsonify(gen_code_chat(data['messages']))
     if 'url' in data:
         d = gen_code(data['url'])
         return jsonify(d)
