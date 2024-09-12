@@ -14,10 +14,10 @@ def fetch(url, type='soup'):
     proxy_url = get_item('proxy_url')
     try:
         # print(f'fetch url: {url}')
-        response = requests.get(url, timeout=10000)
+        response = requests.get(url, headers=headers, timeout=10000)
         if response.status_code > 300:
             raise RuntimeError(f'status err : {response.status_code}')
-        response.encoding = 'utf-8'
+        response.encoding = response.apparent_encoding
         if type == 'soup':
             return BeautifulSoup(response.text, 'html.parser')
         elif type == 'text':

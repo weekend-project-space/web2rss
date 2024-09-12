@@ -14,7 +14,7 @@ class Route:
 
     def call_handler(self, config):
         if self.type == "proxy":
-            return fetch(self.url, '').content
+            return fetch(self.url, '').text
         else:
             moudle = 'repo.'+_get_module_path(self.key)
             return call(moudle, self.url, config).to_xml(encoding='utf-8')
@@ -51,12 +51,22 @@ class Router:
         routes = self.search(has_url)
         if len(routes) > 0:
             return routes
+        elif url.endswith('.xml'):
+            res_text = fetch(url, 'text')
+            print(res_text)
+            if '</feed>' in res_text or '</rss>' in res_text:
+                key = url.split('://')[1]
+                self.add(key, url, 'proxy')
+                routes = self.search(has_url)
+                if len(routes) > 0:
+                    return routes
         routes = _get_remote_router_no_err().search(has_url)
         return list(map(lambda r:  r.put_ext('source', 'remote'), routes))
 
-    def add(self, key, url, type, parserStr):
+    def add(self, key, url, type, parserStr=None):
         route = Route(key, url, None, type)
-        _write_parser_file(self._local_repo_path, key, parserStr)
+        if parserStr is not None and parserStr.strip() != "":
+            _write_parser_file(self._local_repo_path, key, parserStr)
         _append_router_file(self._local_repo_path+'/router.txt', route.meta)
         self.routes[key] = route
 
