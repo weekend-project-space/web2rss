@@ -1,5 +1,5 @@
-proxy_url=http://localhost:3390/proxy
-remote_url=https://github.com/weekend-project-space/web2rss/raw/main/
+proxy_url=https://localhost:8080/proxy
+remote_url=https://raw.githubusercontent.com/weekend-project-space/web2rss/main
 local_repo_path=.
 gpt_api_key=sk-xxx
 gpt_api_url=https://openai.com/v1/chat/completions
