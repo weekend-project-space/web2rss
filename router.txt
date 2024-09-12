@@ -1,1 +1,3 @@
 www.ruanyifeng.com/blog=https://www.ruanyifeng.com/blog/atom.xml,proxy
+blog.codingnow.com/atom.xml=https://blog.codingnow.com/atom.xml,proxy
+military.china.com/news=https://military.china.com/news,html
