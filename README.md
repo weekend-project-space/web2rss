@@ -14,6 +14,10 @@
 
 - [x] fetch (error) -> proxy
 
+## 在线体验
+
+[web2rss](https://web2rss.cc/)
+
 ## 使用
 
 - 命令行 pip install -f ./requirements.txt
