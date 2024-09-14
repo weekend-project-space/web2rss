@@ -3,10 +3,8 @@ from bs4 import BeautifulSoup
 from support.config import get_item
 
 headers = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
-        (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Connection': 'keep-alive'
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/\
+    537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36'
 }
 
 
@@ -17,7 +15,8 @@ def fetch(url, type='soup'):
         response = requests.get(url, headers=headers, timeout=10000)
         if response.status_code > 300:
             raise RuntimeError(f'status err : {response.status_code}')
-        response.encoding = response.apparent_encoding
+        if response.apparent_encoding:
+            response.encoding = response.apparent_encoding
         if type == 'soup':
             return BeautifulSoup(response.text, 'html.parser')
         elif type == 'text':

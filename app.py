@@ -5,6 +5,7 @@ from support.router import init_router
 from support.config import init_cofig
 from support.gpt import gen_code, gen_code_chat
 from support.dyncall import eval_rss_parser
+from support.fetch import fetch
 
 
 class ParserConfig:
@@ -15,6 +16,11 @@ class ParserConfig:
 
 app = Flask(__name__)
 
+
+@app.route('/proxy')
+def proxy():
+    url = request.args.get('url')
+    return fetch(url, 'text')
 
 @app.route('/')
 def index():
