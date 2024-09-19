@@ -3,3 +3,4 @@ PyRSS2Gen
 lxml
 flask
 cachetools
+readability-lxml

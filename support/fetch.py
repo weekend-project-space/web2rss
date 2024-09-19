@@ -24,7 +24,7 @@ def fetch(url, type='soup'):
     url = unquote(url)
     proxy_url = get_item('proxy_url')
     try:
-        # print(f'fetch url: {url}')
+        logger.info(f'fetch url: {url}')
         response = requests.get(url, headers=headers, timeout=10000)
         if response.status_code > 300:
             raise RuntimeError(f'status err : {response.status_code},\

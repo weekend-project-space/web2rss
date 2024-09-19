@@ -1,7 +1,7 @@
 from flask import Flask, Response, request, make_response, render_template, \
     jsonify
 # from paser.t import parser
-from support.router import init_router
+from support.router import init_router, RouterMatch
 from support.config import init_cofig
 from support.gpt import gen_code, gen_code_chat
 from support.dyncall import eval_rss_parser
@@ -86,7 +86,10 @@ def list_feed():
     url = request.args.get('url')
 
     def to_feed(r):
-        return {'feed': '/feed/' + r.key, "url": r.url,
+        if RouterMatch.can_math(r.key):
+            suffix = url[len(r.url[:-1]):]
+            feed = r.key[:-1] + suffix
+        return {'feed': '/feed/' + feed, "url": r.url,
                 "source": r.ext['source']}
     arr = list(map(to_feed, router.search_routes(url)))
     return jsonify(arr)
@@ -98,17 +101,18 @@ def feed(subpath):
         arg = '&'.join(f'{k}={v}' for k, v in request.args.to_dict().items())
         key = subpath + arg
         if key in cache:
-            print("Using cached object")
             rss_xml = cache[key]
         else:
             route = router.get_route(subpath)
             rss_xml = route\
-                .call_handler(ParserConfig(request.args))
+                .call_handler(subpath, ParserConfig(request.args))
             cache[key] = rss_xml
         return Response(rss_xml, mimetype='text/xml')
-    except KeyError:
-        return make_response({'error': 'page nofound'}, 404)
+    except KeyError as k:
+        # k.with_traceback()
+        return make_response({'error': 'page nofound '+str(k)}, 404)
     except Exception as e:
+        # e.with_traceback()
         return make_response({'error': str(e)}, 500)
 
 

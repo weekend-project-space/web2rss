@@ -16,28 +16,34 @@ class Route:
         self.type = type
         self.ext = {"source": "local"}
 
-    def call_handler(self, config):
+    def call_handler(self, subpath, config):
+        if RouterMatch.can_math(self.key):
+            suffix = subpath[len(self.key[:-1]):]
+            url = self.url[:-1] + suffix
         if self.type == "proxy":
-            return fetch(self.url, '').text
+            return fetch(url, '').text
         else:
             moudle = 'repo.'+_get_module_path(self.key)
-            rss = call(moudle, self.url, config)
+            rss = call(moudle, url, config)
             if config.preview:
-                items = []
-                for item in rss.items:
-                    items.append(item)
-                    if item.title == item.description:
-                        try:
-                            d = url2maincontent(item.link)
-                            item.description = d
-                        except RuntimeError as e:
-                            logger.warning(f"fetch item error: {e}")
-                rss.items = items
+                self._preview(rss)
             return rss.to_xml(encoding='utf-8')
 
     def put_ext(self, key, v):
         self.ext[key] = v
         return self
+
+    def _preview(self, rss):
+        items = []
+        for item in rss.items:
+            items.append(item)
+            if item.title == item.description:
+                try:
+                    d = url2maincontent(item.link)
+                    item.description = d
+                except RuntimeError as e:
+                    logger.warning(f"fetch item error: {e}")
+        rss.items = items
 
 
 class Router:
@@ -46,7 +52,7 @@ class Router:
         self._remote_url = get_item('remote_url')
         self._local_repo_path = get_item('local_repo_path')
         self._router_file_path = router_file_path
-        print(f"init {router_file_path} routes: {routes.keys()}")
+        logger.info(f"init {router_file_path} routes: {routes.keys()}")
 
     def _call(self, fn):
         return fn(self.routes)
@@ -55,15 +61,21 @@ class Router:
         return list(filter(filter_fn, self.routes.values()))
 
     def get_route(self, key):
-        route = self.routes[key]
-        if route:
-            return route
+        if key in self.routes.keys():
+            return self.routes[key]
         else:
-            KeyError('key not found:' + key)
+            keys = list(filter(lambda k:  RouterMatch.match(key, k),
+                               self.routes.keys()))
+            if len(keys) == 1:
+                return self.routes[keys[0]]
+            else:
+                KeyError('key not found:' + key)
 
     def search_routes(self, url):
         def has_url(r):
-            return r.url == url or r.key in url
+            return r.url == url or r.key in url or\
+                RouterMatch.match(url, r.url) or\
+                RouterMatch.match(url, r.key)
         routes = self.search(has_url)
         if len(routes) > 0:
             return routes
@@ -106,9 +118,12 @@ def _init_routes(router_file_path):
 
 class RouterMatch:
 
+    def can_math(key):
+        return key[-1:] == '*'
+
     def match(url, key):
         if key[-1:] == '*':
-            return key in url
+            return key[:-1] in url
         else:
             False
 
@@ -123,8 +138,11 @@ def _reverse_domain(domain):
     return reversed_domain
 
 
-def _get_module_path(subpath):
-    paths = subpath.split('/')
+def _get_module_path(key):
+    # key = subpath
+    if RouterMatch.can_math(key):
+        key = key[:-1]+'dyncall'
+    paths = key.split('/')
     paths[0] = _reverse_domain(paths[0])
     return ".".join(paths)
 

@@ -71,29 +71,39 @@
                     <thead>
                         <tr>
                             <th
-                                class="border-b dark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
+                                class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
                                 source</th>
                             <th
-                                class="border-b dark:border-slate-600 font-medium p-4 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
-                                link</th>
+                                class="border-b dark:border-slate-600 font-medium p-3 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
+                                match url</th>
                             <th
-                                class="border-b dark:border-slate-600 font-medium p-4 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
+                                class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
+                                feed preview</th>
+                            <th
+                                class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
                                 feed</th>
+
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-slate-800">
                         <tr v-for="item in data" :key="item.feed">
-                            <td class="border-b border-slate-100 dark:border-slate-700 p-4 text-slate-200 dark:text-slate-400"
+                            <td class="border-b border-slate-100 dark:border-slate-700 p-3 text-slate-200 dark:text-slate-400"
                                 v-text="item.source">
                             </td>
-                            <td class="border-b border-slate-100 dark:border-slate-700 p-4 text-slate-200 dark:text-slate-400"
+                            <td class="border-b border-slate-100 dark:border-slate-700 p-3 text-slate-200 dark:text-slate-400"
                                 v-text="item.url">
                             </td>
                             <td
-                                class="border-b border-slate-100 dark:border-slate-700 p-4 pr-8 text-indigo-200 hover:text-indigo-300 dark:text-indigo-400">
-                                <p v-if="item.source=='remote'" @click="pullRoute">pull</p>
-                                <a v-else target="_blank" :href="item.feed" v-text="item.feed"></a>
+                                class="border-b border-slate-100 dark:border-slate-700 p-3 pr-8 text-indigo-200 hover:text-indigo-300 dark:text-indigo-400">
+                                <p v-if="item.source=='remote'" @click="pullRoute">-</p>
+                                <a v-else target="_blank" :href="item.feed+'?preview=true'">feed preview</a>
                             </td>
+                            <td
+                                class="border-b border-slate-100 dark:border-slate-700 p-3 pr-8 text-indigo-200 hover:text-indigo-300 dark:text-indigo-400">
+                                <p v-if="item.source=='remote'" @click="pullRoute">pull</p>
+                                <a v-else target="_blank" :href="item.feed">feed</a>
+                            </td>
+
                         </tr>
                     </tbody>
                 </table>
