@@ -1,6 +1,7 @@
 from support.fetch import fetch
 from support.config import get_item
 from support.dyncall import call
+from support.url2mc import url2maincontent
 import os
 
 
@@ -17,7 +18,15 @@ class Route:
             return fetch(self.url, '').text
         else:
             moudle = 'repo.'+_get_module_path(self.key)
-            return call(moudle, self.url, config).to_xml(encoding='utf-8')
+            rss = call(moudle, self.url, config)
+            if config.preview:
+                for item in rss.items:
+                    if item.title == item.description:
+                        try:
+                            item.description = url2maincontent(item.link)
+                        except RuntimeError:
+                            pass
+            return rss.to_xml(encoding='utf-8')
 
     def put_ext(self, key, v):
         self.ext[key] = v
@@ -176,4 +185,4 @@ def __write_file(file_path, mode, content):
 
 
 def _is_rss_or_atom(content):
-    return ('<rss' in content or '<feed' in content)
+    return content is not None and ('<rss' in content or '<feed' in content)

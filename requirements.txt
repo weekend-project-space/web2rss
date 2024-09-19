@@ -2,3 +2,4 @@ beautifulsoup4
 PyRSS2Gen
 lxml
 flask
+cachetools

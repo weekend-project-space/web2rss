@@ -1,6 +1,12 @@
 import requests
+import logging
 from bs4 import BeautifulSoup
+from urllib.parse import unquote
 from support.config import get_item
+
+
+logger = logging.getLogger(__name__)
+
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/\
@@ -15,6 +21,7 @@ _charsets = ['GB', 'UTF', 'ISO']
 
 
 def fetch(url, type='soup'):
+    url = unquote(url)
     proxy_url = get_item('proxy_url')
     try:
         # print(f'fetch url: {url}')
@@ -22,7 +29,7 @@ def fetch(url, type='soup'):
         if response.status_code > 300:
             raise RuntimeError(f'status err : {response.status_code},\
                                 err: {response.content}')
-        print(response.apparent_encoding)
+        # print(response.apparent_encoding)
         ec = response.apparent_encoding
         if ec and len(list(filter(lambda c: c in ec, _charsets))):
             response.encoding = response.apparent_encoding
@@ -35,10 +42,10 @@ def fetch(url, type='soup'):
         else:
             return response
     except requests.exceptions.ConnectionError:
-        print("网络连接错误，请检查网络或网址。")
+        logger.warning(f"网络连接错误，请检查网络或网址 {url}")
     except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP错误发生: {http_err}")
+        logger.warning(f"HTTP错误发生: {http_err}")
     except Exception as err:
-        print(f"其他错误: {err}")
+        logger.warning(f"其他错误: {err}")
     if proxy_url not in url:
         return fetch(proxy_url+"?url="+url, type)

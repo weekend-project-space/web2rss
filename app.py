@@ -6,12 +6,20 @@ from support.config import init_cofig
 from support.gpt import gen_code, gen_code_chat
 from support.dyncall import eval_rss_parser
 from support.fetch import fetch
+import logging
+from cachetools import TTLCache
+
+
+# 创建一个具有TTL的缓存，最大存储128个结果，TTL为3600秒
+cache = TTLCache(maxsize=128, ttl=3600)
 
 
 class ParserConfig:
     def __init__(self,
                  request_args):
         self.request_args = request_args
+        self.preview = request_args['preview'] if 'preview' in request_args\
+            else False
 
 
 app = Flask(__name__)
@@ -21,6 +29,7 @@ app = Flask(__name__)
 def proxy():
     url = request.args.get('url')
     return fetch(url, 'text')
+
 
 @app.route('/')
 def index():
@@ -86,9 +95,16 @@ def list_feed():
 @app.route('/feed/<path:subpath>')
 def feed(subpath):
     try:
-        route = router.get_route(subpath)
-        rss_xml = route\
-            .call_handler(ParserConfig(request.args))
+        arg = '&'.join(f'{k}={v}' for k, v in request.args.to_dict().items())
+        key = subpath + arg
+        if key in cache:
+            print("Using cached object")
+            rss_xml = cache[key]
+        else:
+            route = router.get_route(subpath)
+            rss_xml = route\
+                .call_handler(ParserConfig(request.args))
+            cache[key] = rss_xml
         return Response(rss_xml, mimetype='text/xml')
     except KeyError:
         return make_response({'error': 'page nofound'}, 404)
@@ -98,6 +114,9 @@ def feed(subpath):
 
 # 启动 Flask Web 服务
 if __name__ == '__main__':
+    # 配置日志
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
     init_cofig()
     router = init_router()
     app.run(host='0.0.0.0', port=3390)
