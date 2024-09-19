@@ -20,6 +20,8 @@ class Route:
         if RouterMatch.can_math(self.key):
             suffix = subpath[len(self.key[:-1]):]
             url = self.url[:-1] + suffix
+        else:
+            url = self.url
         if self.type == "proxy":
             return fetch(url, '').text
         else:

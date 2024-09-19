@@ -89,6 +89,8 @@ def list_feed():
         if RouterMatch.can_math(r.key):
             suffix = url[len(r.url[:-1]):]
             feed = r.key[:-1] + suffix
+        else:
+            feed = r.key
         return {'feed': '/feed/' + feed, "url": r.url,
                 "source": r.ext['source']}
     arr = list(map(to_feed, router.search_routes(url)))
