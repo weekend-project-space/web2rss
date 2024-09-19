@@ -96,12 +96,13 @@
                             <td
                                 class="border-b border-slate-100 dark:border-slate-700 p-3 pr-8 text-indigo-200 hover:text-indigo-300 dark:text-indigo-400">
                                 <p v-if="item.source=='remote'" @click="pullRoute">-</p>
-                                <a v-else target="_blank" :href="item.feed+'?preview=true'">feed preview</a>
+                                <a v-else-if="item.source=='local'" target="_blank"
+                                    :href="item.feed+'?preview=true'">feed preview</a>
                             </td>
                             <td
                                 class="border-b border-slate-100 dark:border-slate-700 p-3 pr-8 text-indigo-200 hover:text-indigo-300 dark:text-indigo-400">
                                 <p v-if="item.source=='remote'" @click="pullRoute">pull</p>
-                                <a v-else target="_blank" :href="item.feed">feed</a>
+                                <a v-else-if="item.source=='local'" target="_blank" :href="item.feed">feed</a>
                             </td>
 
                         </tr>
@@ -163,7 +164,7 @@
             setup() {
                 const text = ref('')
                 const code = ref('')
-                const data = ref([{ url: '-' }])
+                const data = ref([])
                 const loading = ref(false)
                 const value = ref('')
                 let messages = []
