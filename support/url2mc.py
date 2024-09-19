@@ -1,4 +1,5 @@
 from support.fetch import fetch
+from readability import Document
 
 
 def _clean_attributes(soup):
@@ -10,6 +11,16 @@ def _clean_attributes(soup):
         for attribute in ['id', 'class', 'style', 'onclick']:
             if attribute in tag.attrs:
                 tag.attrs.pop(attribute, None)
+
+
+def _clean_empty_tag(soup):
+    """
+    删除 HTML 中的无用标签。
+    """
+    for tag in soup.find_all(True):
+        # 去掉空标签，检查是否只有空格或换行符
+        if not tag.text.strip():
+            tag.decompose()  # 删除标签及其内容
 
 
 def url2maincontent(url):
@@ -24,10 +35,12 @@ def url2maincontent(url):
             element.decompose()
     # 清理标签属性
     _clean_attributes(soup)
+    _clean_empty_tag(soup)
     # 尝试提取正文内容
     main_content = soup.find('main') or soup.find('article') or\
         soup.find('div', class_='content')
     if main_content:
         return main_content.prettify()
     else:
-        return "<p>没有找到正文内容</p>"
+        doc = Document(soup.find('body').prettify())
+        return doc.summary()

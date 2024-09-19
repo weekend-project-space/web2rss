@@ -3,6 +3,9 @@ from support.config import get_item
 from support.dyncall import call
 from support.url2mc import url2maincontent
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Route:
@@ -20,12 +23,16 @@ class Route:
             moudle = 'repo.'+_get_module_path(self.key)
             rss = call(moudle, self.url, config)
             if config.preview:
+                items = []
                 for item in rss.items:
+                    items.append(item)
                     if item.title == item.description:
                         try:
-                            item.description = url2maincontent(item.link)
-                        except RuntimeError:
-                            pass
+                            d = url2maincontent(item.link)
+                            item.description = d
+                        except RuntimeError as e:
+                            logger.warning(f"fetch item error: {e}")
+                rss.items = items
             return rss.to_xml(encoding='utf-8')
 
     def put_ext(self, key, v):
@@ -95,6 +102,15 @@ def init_router(router_file_path="router.txt"):
 def _init_routes(router_file_path):
     with open(router_file_path, 'r') as file:
         return _bulid_routes(file)
+
+
+class RouterMatch:
+
+    def match(url, key):
+        if key[-1:] == '*':
+            return key in url
+        else:
+            False
 
 
 def _reverse_domain(domain):
