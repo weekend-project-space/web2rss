@@ -17,9 +17,10 @@ def _clean_empty_tag(soup):
     """
     删除 HTML 中的无用标签。
     """
+    notTags = ['audio', 'video', 'img']
     for tag in soup.find_all(True):
         # 去掉空标签，检查是否只有空格或换行符
-        if not tag.text.strip():
+        if not tag.text.strip() and tag.name not in notTags:
             tag.decompose()  # 删除标签及其内容
 
 

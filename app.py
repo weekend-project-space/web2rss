@@ -8,6 +8,7 @@ from support.dyncall import eval_rss_parser
 from support.fetch import fetch
 import logging
 from cachetools import TTLCache
+from urllib.parse import urlencode
 
 
 # 创建一个具有TTL的缓存，最大存储128个结果，TTL为3600秒
@@ -20,6 +21,9 @@ class ParserConfig:
         self.request_args = request_args
         self.preview = request_args['preview'] if 'preview' in request_args\
             else False
+
+    def req_args_str(self):
+        return '?'+urlencode(self.request_args)
 
 
 app = Flask(__name__)
