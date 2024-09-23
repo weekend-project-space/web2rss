@@ -24,8 +24,8 @@ def fetch(url, type='soup'):
     url = unquote(url)
     proxy_url = get_item('proxy_url')
     try:
-        logger.info(f'fetch url: {url}')
-        response = requests.get(url, headers=headers, timeout=10000)
+        logger.debug(f'fetch url: {url}')
+        response = requests.get(url, headers=headers, timeout=30000)
         if response.status_code > 300:
             raise RuntimeError(f'status err : {response.status_code},\
                                 err: {response.content}')
@@ -41,11 +41,14 @@ def fetch(url, type='soup'):
             return response.text
         else:
             return response
-    except requests.exceptions.ConnectionError:
-        logger.warning(f"网络连接错误，请检查网络或网址 {url}")
+    except requests.exceptions.ConnectionError as conection_e:
+        err = conection_e
     except requests.exceptions.HTTPError as http_err:
-        logger.warning(f"HTTP错误发生: {http_err}")
-    except Exception as err:
-        logger.warning(f"其他错误: {err}")
+        err = http_err
+    except Exception as e:
+        err = e
     if proxy_url not in url:
         return fetch(proxy_url+"?url="+url, type)
+    else:
+        logger.warning(f"error: {err}")
+        raise err

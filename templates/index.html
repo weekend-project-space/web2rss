@@ -4,7 +4,6 @@
 <head>
     <title>web2rss</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -23,6 +22,9 @@
 
 <body class="relative bg-gray-900 ">
 
+    <div class="flex justify-end py-6 px-6"><a href="https://github.com/weekend-project-space/web2rss"><img
+                src="https://img.shields.io/github/stars/weekend-project-space/web2rss.svg?style=social&amp;label=Stars"
+                alt=""></a></div>
 
     <div id="app" class=" py-16 sm:py-24 lg:py-32">
         <div class="mx-auto max-w-2xl px-6 lg:px-8">
@@ -31,13 +33,12 @@
                     <img class="mx-auto mb-6" src="/static/logo.png" alt="">
                     <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Web to RSS.
                     </h2>
-                    <p class="mt-4 text-lg leading-8 text-gray-300">Convert your favorite webpage list to RSS through
-                        LLM driver for your convenience.</p>
+                    <p class="mt-4 text-lg leading-8 text-gray-300" v-text="$t('subtitle')"></p>
                     <div class="mt-6 flex  ">
                         <label for="url" class="sr-only">url</label>
                         <input id="url" name="text" type="text" autocomplete="text" required
-                            class="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
-                            placeholder="Enter website url" v-model="text">
+                            class="focus:outline-none  min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6"
+                            :placeholder="$t('input')" v-model="text" @keyup.enter="gen">
                         <button v-if="loading" disabled type="button"
                             class="py-2.5 px-5 me-2 text-sm font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center">
                             <svg aria-hidden="true" role="status"
@@ -50,10 +51,11 @@
                                     d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
                                     fill="#1C64F2" />
                             </svg>
-                            Generate...
+                            <span v-text="$t('btn')"></span>
                         </button>
                         <button v-else type="submit" @click="gen"
-                            class="flex-none rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Generate</button>
+                            class="flex-none rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                            v-text="$t('btn')"></button>
                     </div>
                 </div>
 
@@ -70,18 +72,18 @@
                 <table class="border-collapse table-auto w-full text-sm">
                     <thead>
                         <tr>
-                            <th
-                                class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
-                                source</th>
-                            <th
-                                class="border-b dark:border-slate-600 font-medium p-3 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
-                                match url</th>
-                            <th
-                                class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
-                                feed preview</th>
-                            <th
-                                class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left">
-                                feed</th>
+                            <th class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left"
+                                v-text="$t('source')">
+                            </th>
+                            <th class="border-b dark:border-slate-600 font-medium p-3 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left"
+                                v-text="$t('match')">
+                            </th>
+                            <th class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left"
+                                v-text="$t('preview')">
+                            </th>
+                            <th class="border-b dark:border-slate-600 font-medium p-3 pr-8 pt-0 pb-3 text-slate-400 dark:text-slate-200 text-left"
+                                v-text="$t('feed')">
+                            </th>
 
                         </tr>
                     </thead>
@@ -90,7 +92,7 @@
                             <td class="border-b border-slate-100 dark:border-slate-700 p-3 text-slate-200 dark:text-slate-400"
                                 v-text="item.source">
                             </td>
-                            <td class="border-b border-slate-100 dark:border-slate-700 p-3 text-slate-200 dark:text-slate-400"
+                            <td class="max-w-56 break-all border-b border-slate-100 dark:border-slate-700 p-3 text-slate-200 dark:text-slate-400"
                                 v-text="item.url">
                             </td>
                             <td
@@ -111,12 +113,12 @@
             </div>
             <div v-else-if="code" class="shadow-sm overflow-hidden">
                 <div class="flex justify-center  my-6">
-                    <button @click="run"
+                    <button v-text="$t('testBtn')" @click="run"
                         class="mr-3 flex-none rounded-md bg-emerald-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">⎙
-                        Test</button>
-                    <button @click="saveRoute"
+                    </button>
+                    <button v-text="$t('useBtn')" @click="saveRoute"
                         class="flex-none rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">✓
-                        Use</button>
+                    </button>
 
                 </div>
                 <div id="coderef" class=" text-white bg-slate-900 px-3 py-3 rounded	" v-html="mark(code)"></div>
@@ -129,25 +131,23 @@
                             placeholder="Describe the problem you encountered" required></textarea>
                     </div>
                     <div class="flex items-center justify-end px-3 py-2 border-t dark:border-gray-600">
-                        <button type="submit" @click="chatGenCode"
+                        <button v-text="$t('btn')" type="submit" @click="chatGenCode"
                             class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">
-                            Post
+
                         </button>
 
                     </div>
                 </div>
             </div>
 
-            <div class="py-6 flex justify-center ">
-                <a class="text-center" href="https://github.com/weekend-project-space/web2rss"><img
-                        src="https://img.shields.io/github/stars/weekend-project-space/web2rss.svg?style=social&amp;label=Stars"
-                        alt=""></a>
+            <div class="py-6  text-center ">
+                <div class="text-indigo-200 hover:text-indigo-300 dark:text-indigo-400 mb-8" @click="loadData('*')"
+                    v-text="$t('all')">
+                </div>
+
             </div>
 
-
-
         </div>
-
     </div>
 
     <div class="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl xl:-top-6" aria-hidden="true">
@@ -155,12 +155,20 @@
             style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)">
         </div>
     </div>
-
-
+    <script type="importmap">
+        { 
+            "imports": {
+                "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+            } 
+        }
+    </script>
     <script type="module">
-        import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+        import { createApp, ref, onMounted } from 'vue'
+        import { createI18n, useI18n } from 'https://unpkg.com/vue-i18n@9/dist/vue-i18n.esm-browser.js'
 
-        createApp({
+
+
+        const app = createApp({
             setup() {
                 const text = ref('')
                 const code = ref('')
@@ -185,9 +193,9 @@
                         }
                     })
                 }
-                async function loadData() {
+                async function loadData(q) {
                     data.value = []
-                    data.value = await fetch(`/feed?url=${text.value}`).then(response => response.json())
+                    data.value = await fetch(`/feed?url=${q || text.value}`).then(response => response.json())
                 }
                 function chatGenCode() {
                     code.value = ''
@@ -256,16 +264,25 @@
                             url: text.value,
                             key: text.value.split('://')[1]
                         };
-                        await fetch('/route', {
-                            method: 'POST', // 请求方法
-                            headers: {
-                                'Content-Type': 'application/json' // 设置请求头，表明发送 JSON 数据
-                            },
-                            body: JSON.stringify(data) // 将 JavaScript 对象转换为 JSON 字符串
-                        }).then(response => response.text())
-                        loadData()
+                        try {
+                            await fetch('/route', {
+                                method: 'POST', // 请求方法
+                                headers: {
+                                    'Content-Type': 'application/json' // 设置请求头，表明发送 JSON 数据
+                                },
+                                body: JSON.stringify(data) // 将 JavaScript 对象转换为 JSON 字符串
+                            }).then(response => response.text())
+                            loadData()
+                        } catch (e) {
+                            alert(e)
+                        }
                     })
                 }
+                onMounted(() => {
+                    setTimeout(() => {
+                        document.querySelector('input').focus()
+                    }, 300)
+                })
                 return {
                     text,
                     data,
@@ -277,10 +294,45 @@
                     saveRoute,
                     pullRoute,
                     mark,
-                    chatGenCode
+                    chatGenCode,
+                    loadData,
                 }
             }
-        }).mount('#app')
+        })
+        const i18n = createI18n({
+            locale: 'cn',
+            fallbackLocale: 'en',
+            messages: {
+                en: {
+                    subtitle: 'Convert your favorite webpage list to RSS through LLM driver for your convenience.',
+                    input: 'enter website',
+                    btn: 'generate',
+                    soure: 'soure',
+                    match: 'match',
+                    feed: 'feed',
+                    preview: 'preview',
+                    all: 'view all',
+                    testBtn: 'test',
+                    useBtn: 'use',
+                    prompt: 'Describe the problem you encountered'
+                },
+                cn: {
+                    subtitle: '通过AI驱动将您喜欢的网页列表转换为RSS，以方便您使用。',
+                    input: '输入要转换的网址',
+                    btn: '开始转化',
+                    soure: '来源',
+                    match: '网址',
+                    feed: 'feed',
+                    preview: '详情',
+                    all: '查看所有',
+                    testBtn: '测试效果',
+                    useBtn: '就它了',
+                    prompt: '你应该这样做'
+                }
+            }
+        })
+        app.use(i18n)
+        app.mount('#app')
     </script>
 </body>
 

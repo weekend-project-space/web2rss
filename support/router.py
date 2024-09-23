@@ -73,21 +73,23 @@ class Router:
             else:
                 KeyError('key not found:' + key)
 
-    def search_routes(self, url):
+    def search_routes(self, q):
         def has_url(r):
-            return r.url == url or r.key in url or\
-                RouterMatch.match(url, r.url) or\
-                RouterMatch.match(url, r.key)
+            # or q in r.url or q in r.key
+            return q == '*' \
+                or r.url == q or r.key in q or\
+                RouterMatch.match(q, r.url) or\
+                RouterMatch.match(q, r.key)
         routes = self.search(has_url)
         if len(routes) > 0:
             return routes
         routes = _get_remote_router_no_err().search(has_url)
         if len(routes) > 0:
             return list(map(lambda r:  r.put_ext('source', 'remote'), routes))
-        res_text = fetch(url, 'text')
+        res_text = fetch(q, 'text')
         if _is_rss_or_atom(res_text):
-            key = url.split('://')[1]
-            self.add(key, url, 'proxy')
+            key = q.split('://')[1]
+            self.add(key, q, 'proxy')
             routes = self.search(has_url)
             if len(routes) > 0:
                 return routes

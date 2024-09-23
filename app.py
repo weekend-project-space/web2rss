@@ -80,6 +80,10 @@ def save_route():
     key = data['key']
     key = key[:-1] if key[-1] == '/' else key
     url = url[:-1] if url[-1] == '/' else url
+    try:
+        eval_rss_parser(data['fun'])
+    except RuntimeError as e:
+        return make_response({'error': str(e)}, 500)
     router.add(key, url, 'html', data['fun'])
     return make_response("", 201)
 
