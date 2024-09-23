@@ -1,10 +1,10 @@
 # web2rss
 
-> 通过 AI 将网页列表转为 rss 格式输出
+> 输入网址输出 rss
 
 - [x] 支持私有化部署
 
-- [x] 支持 llm
+- [x] 支持 AI
 
 - [x] 支持 rss 源代理
 
@@ -20,10 +20,24 @@
 
 ## 使用
 
+**直接运行**
+
+- 下载项目
+
 - 命令行 pip install -f ./requirements.txt
 
 - 修改 config.txt 中的 gpt 参数
 
 - 命令行 python3 ./app.py
+
+- 打开浏览器
+
+**docker 运行**
+
+- 下载项目
+
+- 命令行 docker build -t web2rss .
+
+- 命令行 docker run -p 3390:3390 web2rss
 
 - 打开浏览器
